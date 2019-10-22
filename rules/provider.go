@@ -2,6 +2,7 @@ package rules
 
 import (
 	"log"
+	"plugin"
 
 	"github.com/wata727/tflint/rules/awsrules"
 	"github.com/wata727/tflint/rules/terraformrules"
@@ -72,6 +73,16 @@ func NewRules(c *tflint.Config) []Rule {
 			ret = append(ret, rule)
 		}
 	}
+
+	p, err := plugin.Open("plugin/plugin.so")
+	if err != nil {
+		panic(err)
+	}
+	ruleset, err := p.Lookup("NewRules")
+	if err != nil {
+		panic(err)
+	}
+	ret = append(ret, ruleset.(func() []Rule)()...)
 
 	return ret
 }
